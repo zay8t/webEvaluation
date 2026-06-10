@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Engine | MY EYES</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        spectra: {
+                            navy: '#0A192F',
+                            gold: '#C5A059',
+                            orange: '#E37B40',
+                            cream: '#F9F7F2',
+                            border: '#E2E8F0',
+                            dark: {
+                                bg: '#020617',
+                                surface: '#0F172A',
+                                card: '#1E293B',
+                                border: '#334155'
+                            }
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['Crimson Pro', 'serif'],
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="theme.js"></script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; }
+        
+        .tab-active { @apply border-spectra-orange text-spectra-orange border-b-2; }
+        .tab-inactive { @apply border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 border-b-2; }
+
+        .stat-card-glow {
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-card-glow::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at center, rgba(227, 123, 64, 0.1) 0%, transparent 70%);
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="bg-spectra-cream dark:bg-spectra-dark-bg text-spectra-navy dark:text-gray-100 font-sans min-h-screen transition-colors duration-300">
+
+    <!-- Admin Navigation -->
+    <header class="sticky top-0 z-50 bg-white/80 dark:bg-spectra-dark-surface/80 backdrop-blur-md border-b border-spectra-border dark:border-spectra-dark-border">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-8">
+                <a href="/" class="font-serif text-2xl font-bold italic tracking-tighter hover:text-spectra-orange transition-colors">
+                    MY EYES <span class="text-xs font-sans uppercase tracking-[0.3em] not-italic text-spectra-orange ml-1">Engine</span>
+                </a>
+                <nav class="hidden lg:flex items-center gap-1">
+                    <button id="nav-stats" onclick="switchTab('stats')" class="px-4 py-5 text-xs font-bold uppercase tracking-widest tab-active transition-all">Analytics</button>
+                    <button id="nav-orders" onclick="switchTab('orders')" class="px-4 py-5 text-xs font-bold uppercase tracking-widest tab-inactive transition-all">Orders</button>
+                    <button id="nav-inventory" onclick="switchTab('inventory')" class="px-4 py-5 text-xs font-bold uppercase tracking-widest tab-inactive transition-all">Inventory</button>
+                    <button id="nav-users" onclick="switchTab('users')" class="px-4 py-5 text-xs font-bold uppercase tracking-widest tab-inactive transition-all">Users</button>
+                    <button id="nav-feedback" onclick="switchTab('feedback')" class="px-4 py-5 text-xs font-bold uppercase tracking-widest tab-inactive transition-all">Feedback</button>
+                </nav>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <button onclick="window.toggleTheme()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-spectra-dark-card transition-colors">
+                    <svg class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                    <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 9H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                </button>
+                <div class="h-8 w-px bg-gray-200 dark:bg-slate-700"></div>
+                <button id="logout-btn" class="text-sm font-bold text-red-500 hover:text-red-700 transition-colors uppercase tracking-tighter">Exit Engine</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        
+        <!-- SECTION: ANALYTICS (PROMPT 12) -->
+        <div id="section-stats" class="space-y-8 animate-in fade-in duration-500">
+            <div class="flex items-center justify-between">
+                <h1 class="font-serif text-4xl font-bold italic">Store Oversight</h1>
+                <button onclick="fetchAllData()" class="p-2 hover:rotate-180 transition-all duration-500 text-spectra-gold">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                </button>
+            </div>
+
+            <!-- Modern Analytic Summary Cards (High-Contrast) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="stat-card-glow bg-spectra-navy text-white p-8 rounded-[2rem] shadow-2xl relative overflow-hidden group">
+                    <div class="relative z-10">
+                        <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-spectra-gold/80 mb-4">Cumulative Revenue</p>
+                        <h3 id="stat-revenue" class="text-4xl font-serif font-bold tracking-tight">PKR 0</h3>
+                        <div class="mt-4 flex items-center gap-2 text-xs text-green-400 font-bold">
+                            <span class="px-2 py-0.5 bg-green-500/20 rounded-full">↑ 12.5%</span>
+                            <span class="opacity-50 font-normal">vs last month</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-spectra-dark-surface p-8 rounded-[2rem] border border-spectra-border dark:border-spectra-dark-border shadow-soft relative group overflow-hidden">
+                    <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400 mb-4">Total Customers</p>
+                    <h3 id="stat-total-users" class="text-4xl font-serif font-bold text-spectra-navy dark:text-white">0</h3>
+                    <div class="absolute -right-4 -bottom-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                        <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-spectra-dark-surface p-8 rounded-[2rem] border border-spectra-border dark:border-spectra-dark-border shadow-soft relative group overflow-hidden">
+                    <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-spectra-orange mb-4">Pending Orders</p>
+                    <h3 id="stat-pending-orders" class="text-4xl font-serif font-bold text-spectra-orange">0</h3>
+                    <div class="mt-4 flex items-center gap-2 text-xs text-spectra-orange font-bold">
+                        <span class="animate-pulse">●</span> Processing Required
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-spectra-dark-surface p-8 rounded-[2rem] border border-spectra-border dark:border-spectra-dark-border shadow-soft relative group overflow-hidden border-l-4 border-l-red-500">
+                    <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-red-500 mb-4">Inventory Alerts</p>
+                    <h3 id="stat-low-stock" class="text-4xl font-serif font-bold text-red-500">0</h3>
+                    <p class="mt-4 text-xs text-red-400 font-bold uppercase">Restock Recommended</p>
+                </div>
+            </div>
+
+            <!-- Secondary Metrics -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white dark:bg-spectra-dark-surface p-6 rounded-2xl border border-spectra-border dark:border-spectra-dark-border flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Total Products</p>
+                        <h4 id="stat-total-products" class="text-2xl font-serif font-bold">0</h4>
+                    </div>
+                    <div class="p-4 bg-gray-50 dark:bg-spectra-dark-card rounded-xl">
+                        <svg class="w-6 h-6 text-spectra-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                    </div>
+                </div>
+                <div class="bg-white dark:bg-spectra-dark-surface p-6 rounded-2xl border border-spectra-border dark:border-spectra-dark-border flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Total Orders</p>
+                        <h4 id="stat-total-orders" class="text-2xl font-serif font-bold">0</h4>
+                    </div>
+                    <div class="p-4 bg-gray-50 dark:bg-spectra-dark-card rounded-xl">
+                        <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: ORDERS (PROMPT 13) -->
+        <div id="section-orders" class="hidden space-y-6">
+            <div class="flex items-center justify-between">
+                <h2 class="font-serif text-3xl font-bold italic tracking-tight">Order Management</h2>
+                <div class="flex gap-4">
+                    <div class="relative">
+                        <input type="text" onkeyup="filterTable('orders-table-body', this.value)" placeholder="Search orders..." class="pl-10 pr-4 py-2.5 bg-white dark:bg-spectra-dark-card border border-spectra-border dark:border-spectra-dark-border rounded-xl text-sm focus:ring-2 focus:ring-spectra-orange outline-none w-64 transition-all">
+                        <svg class="w-4 h-4 absolute left-3.5 top-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-spectra-dark-surface rounded-[2rem] border border-spectra-border dark:border-spectra-dark-border shadow-xl overflow-hidden">
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left">
+                        <thead class="bg-gray-50 dark:bg-spectra-dark-card/50 border-b border-gray-100 dark:border-spectra-dark-border">
+                            <tr>
+                                <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Order ID</th>
+                                <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Customer</th>
+                                <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Financials</th>
+                                <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Status</th>
+                                <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-table-body" class="divide-y divide-gray-100 dark:divide-spectra-dark-border">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: INVENTORY (PROMPT 13) -->
+        <div id="section-inventory" class="hidden space-y-6">
+            <div class="flex items-center justify-between">
+                <h2 class="font-serif text-3xl font-bold italic tracking-tight">Product Vault</h2>
+                <button onclick="openProductModal()" class="px-6 py-3 bg-spectra-navy text-white text-xs font-bold uppercase tracking-widest rounded-xl shadow-lg hover:bg-spectra-orange transition-all flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    Add New Frame
+                </button>
+            </div>
+
+            <div class="bg-white dark:bg-spectra-dark-surface rounded-[2rem] border border-spectra-border dark:border-spectra-dark-border shadow-xl overflow-hidden">
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left">
+                        <thead class="bg-gray-50 dark:bg-spectra-dark-card/50 border-b border-gray-100 dark:border-spectra-dark-border">
+                            <tr>
+                                <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Product</th>
+                                <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Category</th>
+                                <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Stock</th>
+                                <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Price</th>
+                                <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventory-table-body" class="divide-y divide-gray-100 dark:divide-spectra-dark-border">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: USERS (PROMPT 13) -->
+        <div id="section-users" class="hidden space-y-6">
+            <h2 class="font-serif text-3xl font-bold italic tracking-tight">Member Directory</h2>
+            <div class="bg-white dark:bg-spectra-dark-surface rounded-[2rem] border border-spectra-border dark:border-spectra-dark-border shadow-xl overflow-hidden">
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left">
+                        <thead class="bg-gray-50 dark:bg-spectra-dark-card/50 border-b border-gray-100 dark:border-spectra-dark-border">
+                            <tr>
+                                <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">User</th>
+                                <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Role</th>
+                                <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Joined</th>
+                                <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-table-body" class="divide-y divide-gray-100 dark:divide-spectra-dark-border">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: FEEDBACK (PROMPT 13) -->
+        <div id="section-feedback" class="hidden space-y-12">
+            <div>
+                <h2 class="font-serif text-3xl font-bold italic tracking-tight mb-6">Customer Reviews</h2>
+                <div class="bg-white dark:bg-spectra-dark-surface rounded-[2rem] border border-spectra-border dark:border-spectra-dark-border shadow-xl overflow-hidden">
+                    <div class="overflow-x-auto custom-scrollbar">
+                        <table class="w-full text-left">
+                            <thead class="bg-gray-50 dark:bg-spectra-dark-card/50 border-b border-gray-100 dark:border-spectra-dark-border">
+                                <tr>
+                                    <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Product</th>
+                                    <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Review</th>
+                                    <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Rating</th>
+                                    <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reviews-table-body" class="divide-y divide-gray-100 dark:divide-spectra-dark-border">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <h2 class="font-serif text-3xl font-bold italic tracking-tight mb-6">Support Inquiries</h2>
+                <div class="bg-white dark:bg-spectra-dark-surface rounded-[2rem] border border-spectra-border dark:border-spectra-dark-border shadow-xl overflow-hidden">
+                    <div class="overflow-x-auto custom-scrollbar">
+                        <table class="w-full text-left">
+                            <thead class="bg-gray-50 dark:bg-spectra-dark-card/50 border-b border-gray-100 dark:border-spectra-dark-border">
+                                <tr>
+                                    <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Subject</th>
+                                    <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Inquiry</th>
+                                    <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Contact</th>
+                                    <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="contact-table-body" class="divide-y divide-gray-100 dark:divide-spectra-dark-border">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Product Modal -->
+    <div id="product-modal" class="fixed inset-0 z-[60] hidden overflow-y-auto">
+        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"></div>
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div class="relative bg-white dark:bg-spectra-dark-surface rounded-3xl w-full max-w-2xl shadow-2xl overflow-hidden transform transition-all border border-spectra-border dark:border-spectra-dark-border">
+                <div class="px-8 py-6 border-b border-gray-100 dark:border-spectra-dark-border flex items-center justify-between">
+                    <h3 id="modal-title" class="font-serif text-2xl font-bold italic">Frame Details</h3>
+                    <button id="close-modal" class="p-2 hover:bg-gray-100 dark:hover:bg-spectra-dark-card rounded-full transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+                <form id="product-form" class="p-8">
+                    <input type="hidden" id="edit-product-id">
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="col-span-2">
+                            <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Internal Name</label>
+                            <input type="text" name="product_name" required class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-spectra-dark-card border border-spectra-border dark:border-spectra-dark-border focus:ring-2 focus:ring-spectra-orange outline-none transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Brand Identity</label>
+                            <input type="text" name="brand" required class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-spectra-dark-card border border-spectra-border dark:border-spectra-dark-border focus:ring-2 focus:ring-spectra-orange outline-none transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Category</label>
+                            <select name="category" class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-spectra-dark-card border border-spectra-border dark:border-spectra-dark-border focus:ring-2 focus:ring-spectra-orange outline-none transition-all">
+                                <option value="Eyeglasses">Eyeglasses</option>
+                                <option value="Sunglasses">Sunglasses</option>
+                                <option value="Reading glasses">Reading glasses</option>
+                                <option value="Accessories">Accessories</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Price Allocation (PKR)</label>
+                            <input type="number" name="price" required class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-spectra-dark-card border border-spectra-border dark:border-spectra-dark-border focus:ring-2 focus:ring-spectra-orange outline-none transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Stock Availability</label>
+                            <input type="number" name="stock_quantity" required class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-spectra-dark-card border border-spectra-border dark:border-spectra-dark-border focus:ring-2 focus:ring-spectra-orange outline-none transition-all">
+                        </div>
+                        <div class="col-span-2">
+                            <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Visual Asset URL</label>
+                            <input type="url" name="image_url" placeholder="https://..." class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-spectra-dark-card border border-spectra-border dark:border-spectra-dark-border focus:ring-2 focus:ring-spectra-orange outline-none transition-all">
+                        </div>
+                    </div>
+                    <div class="mt-8 flex gap-4">
+                        <button type="submit" class="flex-1 py-4 bg-spectra-navy text-white text-xs font-bold uppercase tracking-widest rounded-2xl shadow-xl hover:bg-spectra-orange transition-all">Commit Changes</button>
+                        <button type="button" onclick="closeProductModal()" class="px-8 py-4 bg-gray-100 dark:bg-spectra-dark-card text-xs font-bold uppercase tracking-widest rounded-2xl hover:bg-gray-200 transition-all">Abort</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-8 right-8 z-[70] transform translate-y-20 opacity-0 transition-all duration-300">
+        <div class="bg-spectra-navy dark:bg-spectra-orange text-white px-8 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-spectra-gold/20">
+            <span id="toast-message" class="text-xs font-bold uppercase tracking-widest">Protocol initialized</span>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>

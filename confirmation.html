@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmed | MY EYES</title>
+    
+    <!-- Efficient Theme Manager -->
+    <script>
+      (function() {
+        try {
+          var stored = localStorage.getItem('theme_preference');
+          var theme = (stored === 'dark' || stored === 'light')
+            ? stored
+            : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+          document.documentElement.classList.add(theme);
+        } catch(e) {
+          document.documentElement.classList.add('light');
+        }
+      })();
+    </script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              spectra: {
+                navy: '#0F0F0F', orange: '#FF5722', amber: '#FFC107',
+                light: '#FFFFFF', offwhite: '#F9FAFB', card: '#F3F4F6',
+                border: '#E5E7EB', 'dark-bg': '#1F1F23', 'dark-surface': '#27272B',
+                'dark-card': '#303036', 'dark-border': '#3F3F46', 'dark-text': '#E4E4E7',
+              }
+            },
+            fontFamily: { sans: ['Inter', 'sans-serif'], serif: ['Playfair Display', 'serif'] }
+          }
+        }
+      }
+    </script>
+    <style>
+      * {
+          font-family: Arial, Helvetica, sans-serif !important;
+      }
+    </style>
+</head>
+<body class="bg-spectra-offwhite dark:bg-spectra-dark-bg text-spectra-navy dark:text-spectra-dark-text min-h-screen font-sans antialiased flex items-center justify-center p-4 transition-colors duration-300">
+
+    <div class="max-w-xl w-full bg-white dark:bg-spectra-dark-surface p-8 sm:p-12 rounded-3xl border border-spectra-border dark:border-spectra-dark-border shadow-lg space-y-8 text-center relative overflow-hidden">
+        
+        <!-- Background accents -->
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-1 bg-gradient-to-r from-spectra-amber to-spectra-orange"></div>
+
+        <!-- Success Animated Check -->
+        <div class="w-20 h-20 bg-green-50 dark:bg-green-950/30 text-green-500 rounded-full flex items-center justify-center mx-auto shadow-inner">
+            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+        </div>
+
+        <div class="space-y-3">
+            <h1 class="text-3xl sm:text-4xl font-serif font-bold italic">Fulfillment Complete!</h1>
+            <p class="text-gray-500 dark:text-gray-400 text-sm max-w-md mx-auto">
+                Your payment authorization was successful. The products have been locked and sent to confirmation.
+            </p>
+        </div>
+
+        <!-- Order Information Box -->
+        <div id="loading-details" class="py-6 flex flex-col items-center justify-center space-y-3">
+            <div class="w-8 h-8 border-2 border-spectra-orange border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-xs text-gray-400 font-semibold">Retrieving receipt details...</p>
+        </div>
+
+        <div id="order-details-box" class="hidden text-left bg-gray-50 dark:bg-spectra-dark-card/50 p-6 rounded-2xl border border-spectra-border dark:border-spectra-dark-border space-y-4">
+            <div class="flex justify-between items-center pb-3 border-b border-gray-200 dark:border-spectra-dark-border">
+                <div>
+                    <p class="text-[9px] uppercase tracking-wider text-gray-400 font-bold">Order Reference</p>
+                    <p class="text-xl font-mono font-bold text-spectra-orange" id="order-ref-id">#ORD-XXXXX</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-[9px] uppercase tracking-wider text-gray-400 font-bold">Fulfillment Status</p>
+                    <span class="px-2.5 py-0.5 bg-green-100 dark:bg-green-950/30 text-green-600 dark:text-green-400 rounded-full text-xs font-bold">Paid</span>
+                </div>
+            </div>
+
+            <div class="space-y-1 text-xs text-gray-500 dark:text-gray-400">
+                <p class="font-bold text-gray-400 uppercase tracking-wider text-[9px] mb-1">Shipping Confirmation Address</p>
+                <p id="shipping-address-lbl" class="leading-relaxed font-medium text-spectra-navy dark:text-spectra-dark-text"></p>
+            </div>
+
+            <div class="space-y-2 pt-2 border-t border-gray-150 dark:border-spectra-dark-border">
+                <p class="font-bold text-gray-400 uppercase tracking-wider text-[9px]">Purchased Items</p>
+                <div id="confirmed-items-list" class="space-y-1.5 max-h-36 overflow-y-auto">
+                    <!-- Loaded dynamically -->
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center pt-3 border-t border-gray-200 dark:border-spectra-dark-border text-sm font-bold">
+                <span class="text-gray-400 text-xs uppercase tracking-wider">Total Charged</span>
+                <span id="order-total-lbl" class="text-spectra-orange text-base">0.00 USD</span>
+            </div>
+        </div>
+
+        <!-- Estimated Delivery Box -->
+        <div class="flex items-center gap-3 bg-blue-50/50 dark:bg-blue-950/10 p-4 rounded-xl border border-blue-100 dark:border-blue-950/30 text-left">
+            <svg class="w-6 h-6 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <div>
+                <h5 class="text-xs font-bold text-blue-900 dark:text-blue-400">Estimated Delivery Window</h5>
+                <p class="text-[10px] text-blue-700/80 dark:text-blue-500/80 mt-0.5 font-medium">Standard ground shipping will arrive in 3 - 5 business days.</p>
+            </div>
+        </div>
+
+        <!-- Redirect Actions -->
+        <div class="flex flex-col sm:flex-row gap-3 pt-2">
+            <a href="/" class="flex-1 py-3.5 border border-spectra-border dark:border-spectra-dark-border hover:bg-gray-50 dark:hover:bg-spectra-dark-card rounded-xl font-bold transition-all text-sm active:scale-98">
+                Continue Shopping
+            </a>
+            <a href="orders-history.html" class="flex-1 py-3.5 bg-spectra-navy hover:bg-spectra-orange text-white rounded-xl font-bold transition-all text-sm shadow-md active:scale-98">
+                View Order History
+            </a>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const params = new URLSearchParams(window.location.search);
+            const orderId = params.get('id');
+
+            if (!orderId) {
+                document.getElementById('loading-details').innerHTML = '<p class="text-red-500 text-xs font-bold">Failed to load receipt details.</p>';
+                return;
+            }
+
+            try {
+                // Fetch the receipt details (supports both guest and authenticated checkout)
+                const res = await fetch(`/api/orders/receipt/${orderId}`);
+                const data = await res.json();
+
+                if (!res.ok || !data.order) {
+                    throw new Error(data.message || 'Receipt data missing');
+                }
+
+                const order = data.order;
+
+                // Render Details
+                document.getElementById('order-ref-id').innerText = `#ORD-${order.order_id}`;
+                document.getElementById('shipping-address-lbl').innerText = order.shipping_address;
+                
+                const formatCurrency = (amount) => {
+                    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+                };
+
+                document.getElementById('order-total-lbl').innerText = formatCurrency(order.total_amount);
+
+                // Render items
+                const listContainer = document.getElementById('confirmed-items-list');
+                listContainer.innerHTML = order.items.map(item => `
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-gray-700 dark:text-gray-300 font-medium truncate max-w-[280px]">${item.product_name}</span>
+                        <span class="text-gray-400 font-mono">Qty: ${item.quantity}</span>
+                    </div>
+                `).join('');
+
+                // Display box and hide spinner loader
+                document.getElementById('loading-details').classList.add('hidden');
+                document.getElementById('order-details-box').classList.remove('hidden');
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById('loading-details').innerHTML = '<p class="text-red-500 text-xs font-bold">Error loading detailed receipt. Order has still been confirmed.</p>';
+            }
+        });
+    </script>
+</body>
+</html>

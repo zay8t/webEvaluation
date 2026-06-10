@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Account | MY EYES</title>
+    
+    <!-- Efficient Theme Manager (Must be first to prevent FOUC) -->
+    <script>
+      (function() {
+        try {
+          var stored = localStorage.getItem('theme_preference');
+          var theme = (stored === 'dark' || stored === 'light')
+            ? stored
+            : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+          document.documentElement.classList.add(theme);
+        } catch(e) {
+          document.documentElement.classList.add('light');
+        }
+      })();
+    </script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              spectra: {
+                navy: '#0F0F0F',
+                orange: '#FF5722',
+                amber: '#FFC107',
+                light: '#FFFFFF',
+                offwhite: '#F9FAFB',
+                card: '#F3F4F6',
+                border: '#E5E7EB',
+                'dark-bg': '#1F1F23',
+                'dark-surface': '#27272B',
+                'dark-card': '#303036',
+                'dark-border': '#3F3F46',
+                'dark-text': '#E4E4E7',
+                'dark-muted': '#A1A1AA',
+              }
+            },
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+              serif: ['Playfair Display', 'serif'],
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      /* Smooth transitions for theme switching */
+      * {
+        transition: background-color 0.3s ease, border-color 0.3s ease, color 0.15s ease;
+      }
+      .loading-skeleton {
+        background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+        background-size: 200% 100%;
+        animation: loading 1.5s infinite;
+      }
+      @keyframes loading {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+      }
+    </style>
+</head>
+<body class="bg-spectra-offwhite dark:bg-spectra-dark-bg text-spectra-navy dark:text-spectra-dark-text min-h-screen font-sans">
+
+    <!-- Header / Navigation -->
+    <header class="border-b border-spectra-border dark:border-spectra-dark-border bg-white dark:bg-spectra-dark-surface sticky top-0 z-40">
+        <div class="container mx-auto px-6 h-16 flex items-center justify-between">
+            <a href="index.html" class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-gradient-to-br from-spectra-amber to-spectra-orange rounded-lg"></div>
+                <span class="font-serif text-xl font-bold italic dark:text-white">MY EYES</span>
+            </a>
+            
+            <nav class="hidden md:flex gap-8 font-medium">
+                <a href="index.html" class="hover:text-spectra-orange transition-colors">Home</a>
+                <a href="index.html#/products" class="hover:text-spectra-orange transition-colors">Shop</a>
+                <a href="index.html#/portfolio" class="hover:text-spectra-orange transition-colors">Portfolio</a>
+                <a href="index.html#/about" class="hover:text-spectra-orange transition-colors">About Us</a>
+                <a href="index.html#/contact" class="hover:text-spectra-orange transition-colors">Contact Us</a>
+            </nav>
+
+            <div class="flex items-center gap-4">
+                <!-- Theme Toggle -->
+                <button id="theme-toggle" class="p-2 rounded-xl hover:bg-gray-150 dark:hover:bg-spectra-dark-card border border-gray-200 dark:border-spectra-dark-border transition-colors">
+                    <svg class="w-5 h-5 dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                    <svg class="w-5 h-5 hidden dark:block text-spectra-amber" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 9h-1m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                </button>
+                
+                <!-- Log Out Button -->
+                <button onclick="logout()" class="px-5 py-2 rounded-xl border border-red-200 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 text-sm font-semibold transition-all">
+                    Log Out
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-12">
+        <div class="max-w-3xl mx-auto">
+            
+            <!-- Page Title -->
+            <div class="mb-10 text-center md:text-left">
+                <span class="px-3 py-1 rounded-full bg-orange-50 dark:bg-spectra-dark-card border border-orange-100 dark:border-spectra-dark-border text-spectra-orange text-xs font-bold uppercase tracking-widest inline-block mb-3">
+                    Customer Portal
+                </span>
+                <h1 class="text-4xl md:text-5xl font-serif font-bold italic mb-2">My Account</h1>
+                <p class="text-gray-500 dark:text-spectra-dark-muted font-light">Manage your contact profile and account security settings.</p>
+            </div>
+
+            <!-- Error Notification -->
+            <div id="alertError" class="hidden mb-8 p-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50 rounded-xl text-red-600 dark:text-red-400 text-sm font-medium flex items-center gap-3">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                <span id="alertErrorText">Failed to resolve request.</span>
+            </div>
+
+            <div id="alertSuccess" class="hidden mb-8 p-4 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900/50 rounded-xl text-green-600 dark:text-green-400 text-sm font-medium flex items-center gap-3">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <span id="alertSuccessText">Operation completed successfully.</span>
+            </div>
+
+            <!-- Profile Info Card -->
+            <div class="bg-white dark:bg-spectra-dark-surface rounded-[2rem] border border-spectra-border dark:border-spectra-dark-border p-8 md:p-12 shadow-sm relative">
+                
+                <!-- Loading State Skeleton -->
+                <div id="loadingState" class="space-y-6">
+                    <div class="flex items-center gap-4">
+                        <div class="loading-skeleton h-12 w-12 rounded-full"></div>
+                        <div class="space-y-2 flex-grow">
+                            <div class="loading-skeleton h-6 w-1/3"></div>
+                            <div class="loading-skeleton h-4 w-1/2"></div>
+                        </div>
+                    </div>
+                    <div class="border-t border-gray-100 dark:border-spectra-dark-border pt-6 space-y-4">
+                        <div class="loading-skeleton h-10 w-full"></div>
+                        <div class="loading-skeleton h-10 w-full"></div>
+                        <div class="loading-skeleton h-10 w-full"></div>
+                    </div>
+                </div>
+
+                <!-- Loaded Profile Data -->
+                <div id="profileContent" class="hidden space-y-8">
+                    
+                    <!-- Header: User Identity -->
+                    <div class="flex flex-col sm:flex-row items-center sm:items-start justify-between gap-6 pb-8 border-b border-gray-100 dark:border-spectra-dark-border">
+                        <div class="flex flex-col sm:flex-row items-center gap-5 text-center sm:text-left">
+                            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-spectra-amber to-spectra-orange flex items-center justify-center text-white font-serif text-3xl font-bold italic shadow-md shrink-0" id="avatarLetter">
+                                U
+                            </div>
+                            <div class="space-y-1">
+                                <div class="flex flex-wrap items-center justify-center sm:justify-start gap-3">
+                                    <h2 class="text-3xl font-serif font-bold text-spectra-navy dark:text-white" id="userName">User</h2>
+                                    <span class="px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-spectra-dark-card border border-blue-100 dark:border-spectra-dark-border text-blue-600 dark:text-blue-400 text-[10px] font-bold uppercase tracking-wider" id="roleBadge">Customer</span>
+                                </div>
+                                <p class="text-sm text-gray-400 font-light" id="userEmail">user@example.com</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <a href="orders-history.html" class="px-4 py-2.5 bg-spectra-navy dark:bg-spectra-dark-card text-white dark:text-spectra-dark-text border border-spectra-border dark:border-spectra-dark-border rounded-xl font-bold hover:bg-gray-800 transition-all text-xs flex items-center gap-1.5 shadow-sm">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                                View Order History
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Details Lists -->
+                    <div class="space-y-6">
+                        <h3 class="text-lg font-serif font-bold text-spectra-navy dark:text-white">Profile Details</h3>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            
+                            <div class="space-y-1">
+                                <span class="text-[10px] uppercase font-bold tracking-wider text-gray-400 block">Full Name</span>
+                                <span class="text-sm font-semibold text-spectra-navy dark:text-spectra-dark-text" id="displayName">-</span>
+                            </div>
+
+                            <div class="space-y-1">
+                                <span class="text-[10px] uppercase font-bold tracking-wider text-gray-400 block">Email Address</span>
+                                <span class="text-sm font-semibold text-spectra-navy dark:text-spectra-dark-text" id="displayEmail">-</span>
+                            </div>
+
+                            <div class="space-y-1">
+                                <span class="text-[10px] uppercase font-bold tracking-wider text-gray-400 block">Phone Number</span>
+                                <span class="text-sm font-semibold text-spectra-navy dark:text-spectra-dark-text" id="displayPhone">-</span>
+                            </div>
+
+                            <div class="space-y-1">
+                                <span class="text-[10px] uppercase font-bold tracking-wider text-gray-400 block">Member Since</span>
+                                <span class="text-sm font-semibold text-spectra-navy dark:text-spectra-dark-text" id="displayMemberSince">-</span>
+                            </div>
+
+                            <div class="space-y-1 sm:col-span-2">
+                                <span class="text-[10px] uppercase font-bold tracking-wider text-gray-400 block">Default Shipping Address</span>
+                                <span class="text-sm font-semibold text-spectra-navy dark:text-spectra-dark-text block leading-relaxed" id="displayAddress">-</span>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Actions Footer -->
+                    <div class="pt-8 border-t border-gray-100 dark:border-spectra-dark-border flex flex-col sm:flex-row gap-3 justify-between">
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <button onclick="openEditModal()" class="px-5 py-3 bg-spectra-navy dark:bg-spectra-orange text-white rounded-xl font-bold hover:opacity-90 transition-all text-xs shadow-sm">
+                                Edit Profile
+                            </button>
+                            <button onclick="openPasswordModal()" class="px-5 py-3 bg-white dark:bg-spectra-dark-card border border-spectra-border dark:border-spectra-dark-border text-spectra-navy dark:text-spectra-dark-text rounded-xl font-bold hover:bg-gray-50 dark:hover:bg-spectra-dark-border transition-all text-xs">
+                                Change Password
+                            </button>
+                        </div>
+                        <button onclick="deleteAccount()" class="px-5 py-3 border border-red-200 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-xl font-bold transition-all text-xs">
+                            Delete Account
+                        </button>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Optional session telemetry -->
+            <div class="mt-8 bg-white dark:bg-spectra-dark-surface p-6 rounded-2xl border border-spectra-border dark:border-spectra-dark-border shadow-sm flex flex-col gap-3">
+                <button onclick="toggleTelemetry()" class="text-xs font-bold text-gray-400 uppercase tracking-widest hover:text-spectra-orange transition-colors flex items-center justify-between w-full">
+                    <span>Developer Session Details</span>
+                    <span id="telemetryArrow">&darr;</span>
+                </button>
+                <div id="telemetryData" class="hidden mt-2 bg-spectra-offwhite dark:bg-spectra-dark-bg p-4 rounded-xl border border-spectra-border dark:border-spectra-dark-border text-[11px] font-mono space-y-2 text-gray-500 dark:text-spectra-dark-muted overflow-hidden">
+                    <p class="truncate"><strong>Access Token:</strong> <span id="telemetryToken" class="break-all">-</span></p>
+                    <p><strong>Database ID:</strong> <span id="telemetryUserId">-</span></p>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- ── MODALS ── -->
+
+    <!-- Edit Profile Modal -->
+    <div id="editProfileModal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeEditModal()"></div>
+        <div class="bg-white dark:bg-spectra-dark-surface rounded-3xl max-w-md w-full p-8 relative z-10 shadow-2xl border border-spectra-border dark:border-spectra-dark-border mx-4 animate-in zoom-in-95 duration-200 space-y-6">
+            <div>
+                <h3 class="text-2xl font-serif font-bold text-spectra-navy dark:text-white">Edit Profile Details</h3>
+                <p class="text-xs text-gray-400 mt-1">Update your basic name and delivery details.</p>
+            </div>
+            
+            <form onsubmit="handleEditProfile(event)" class="space-y-4">
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold uppercase tracking-wider text-gray-400">Full Name</label>
+                    <input type="text" id="editName" required class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-spectra-dark-border bg-white dark:bg-spectra-dark-card text-spectra-navy dark:text-white focus:border-spectra-orange outline-none text-sm transition-all" />
+                </div>
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold uppercase tracking-wider text-gray-400">Phone Number</label>
+                    <input type="text" id="editPhone" class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-spectra-dark-border bg-white dark:bg-spectra-dark-card text-spectra-navy dark:text-white focus:border-spectra-orange outline-none text-sm transition-all" placeholder="+92 300 0000000" />
+                </div>
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold uppercase tracking-wider text-gray-400">Shipping Address</label>
+                    <textarea id="editAddress" rows="3" class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-spectra-dark-border bg-white dark:bg-spectra-dark-card text-spectra-navy dark:text-white focus:border-spectra-orange outline-none text-sm transition-all resize-none" placeholder="Enter your full home or office address"></textarea>
+                </div>
+                
+                <div class="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-spectra-dark-border">
+                    <button type="button" onclick="closeEditModal()" class="px-5 py-2.5 border border-spectra-border dark:border-spectra-dark-border text-gray-500 hover:text-spectra-navy rounded-xl font-semibold transition-all text-xs">Cancel</button>
+                    <button type="submit" id="saveProfileBtn" class="px-5 py-2.5 bg-spectra-navy dark:bg-spectra-orange text-white rounded-xl font-semibold hover:opacity-90 transition-all text-xs">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div id="changePasswordModal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closePasswordModal()"></div>
+        <div class="bg-white dark:bg-spectra-dark-surface rounded-3xl max-w-md w-full p-8 relative z-10 shadow-2xl border border-spectra-border dark:border-spectra-dark-border mx-4 animate-in zoom-in-95 duration-200 space-y-6">
+            <div>
+                <h3 class="text-2xl font-serif font-bold text-spectra-navy dark:text-white">Change Password</h3>
+                <p class="text-xs text-gray-400 mt-1">Secure your account with a new access credential.</p>
+            </div>
+            
+            <form onsubmit="handleChangePassword(event)" class="space-y-4">
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold uppercase tracking-wider text-gray-400">Current Password</label>
+                    <input type="password" id="currentPassword" required class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-spectra-dark-border bg-white dark:bg-spectra-dark-card text-spectra-navy dark:text-white focus:border-spectra-orange outline-none text-sm transition-all" />
+                </div>
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold uppercase tracking-wider text-gray-400">New Password (min 6 characters)</label>
+                    <input type="password" id="newPassword" required class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-spectra-dark-border bg-white dark:bg-spectra-dark-card text-spectra-navy dark:text-white focus:border-spectra-orange outline-none text-sm transition-all" />
+                </div>
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold uppercase tracking-wider text-gray-400">Confirm New Password</label>
+                    <input type="password" id="confirmNewPassword" required class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-spectra-dark-border bg-white dark:bg-spectra-dark-card text-spectra-navy dark:text-white focus:border-spectra-orange outline-none text-sm transition-all" />
+                </div>
+                
+                <div class="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-spectra-dark-border">
+                    <button type="button" onclick="closePasswordModal()" class="px-5 py-2.5 border border-spectra-border dark:border-spectra-dark-border text-gray-500 hover:text-spectra-navy rounded-xl font-semibold transition-all text-xs">Cancel</button>
+                    <button type="submit" id="savePasswordBtn" class="px-5 py-2.5 bg-spectra-navy dark:bg-spectra-orange text-white rounded-xl font-semibold hover:opacity-90 transition-all text-xs">Update Password</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Page Logic -->
+    <script src="auth.js"></script>
+    <script>
+        const token = getStoredToken();
+        let globalUser = null;
+
+        // Redirect immediately if no token is found
+        if (!token) {
+            window.location.href = 'login.html?redirect=profile.html';
+        }
+
+        // Setup theme toggle handler
+        document.getElementById('theme-toggle').addEventListener('click', () => {
+            const current = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.classList.remove('light', 'dark');
+            document.documentElement.classList.add(next);
+            localStorage.setItem('theme_preference', next);
+        });
+
+        function showNotification(type, message) {
+            const elId = type === 'success' ? 'alertSuccess' : 'alertError';
+            const textId = type === 'success' ? 'alertSuccessText' : 'alertErrorText';
+            const el = document.getElementById(elId);
+            document.getElementById(textId).textContent = message;
+            el.classList.remove('hidden');
+            
+            setTimeout(() => {
+                el.classList.add('hidden');
+            }, 6000);
+        }
+
+        async function fetchFreshProfile() {
+            try {
+                const response = await fetch('/api/auth/me', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const data = await response.json();
+
+                if (!response.ok || !data.success) {
+                    throw new Error(data.message || 'Failed to sync account profile.');
+                }
+
+                globalUser = data.user;
+                // Sync cache
+                localStorage.setItem('user_profile', JSON.stringify(globalUser));
+                renderProfile();
+            } catch (err) {
+                console.error(err);
+                showNotification('error', err.message || 'Unable to sync profile details.');
+                
+                // Fallback to cache if exists
+                const cached = getCurrentUser();
+                if (cached) {
+                    globalUser = cached;
+                    renderProfile();
+                } else {
+                    logout();
+                }
+            }
+        }
+
+        function renderProfile() {
+            if (!globalUser) return;
+
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('profileContent').classList.remove('hidden');
+
+            document.getElementById('avatarLetter').textContent = (globalUser.full_name || 'U').charAt(0).toUpperCase();
+            document.getElementById('userName').textContent = globalUser.full_name || 'User';
+            document.getElementById('userEmail').textContent = globalUser.email;
+
+            document.getElementById('displayName').textContent = globalUser.full_name || '-';
+            document.getElementById('displayEmail').textContent = globalUser.email;
+            document.getElementById('displayPhone').textContent = globalUser.phone || 'Not provided';
+            document.getElementById('displayAddress').textContent = globalUser.address || 'No shipping address saved';
+
+            const roleName = (globalUser.role || 'customer').toUpperCase();
+            document.getElementById('roleBadge').textContent = roleName;
+            
+            if (globalUser.role === 'admin') {
+                document.getElementById('roleBadge').className = "px-2.5 py-0.5 rounded-full bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/50 text-red-650 dark:text-red-400 text-[10px] font-bold uppercase tracking-wider";
+            }
+
+            // Member date formatting
+            if (globalUser.created_at) {
+                const date = new Date(globalUser.created_at);
+                document.getElementById('displayMemberSince').textContent = date.toLocaleDateString('en-GB', {
+                    day: 'numeric', month: 'long', year: 'numeric'
+                });
+            } else {
+                document.getElementById('displayMemberSince').textContent = 'Recently';
+            }
+
+            // Telemetry Debug Info
+            document.getElementById('telemetryToken').textContent = token;
+            document.getElementById('telemetryUserId').textContent = globalUser.user_id;
+        }
+
+        // Modals management
+        function openEditModal() {
+            if (!globalUser) return;
+            document.getElementById('editName').value = globalUser.full_name || '';
+            document.getElementById('editPhone').value = globalUser.phone || '';
+            document.getElementById('editAddress').value = globalUser.address || '';
+            document.getElementById('editProfileModal').classList.remove('hidden');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editProfileModal').classList.add('hidden');
+        }
+
+        function openPasswordModal() {
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmNewPassword').value = '';
+            document.getElementById('changePasswordModal').classList.remove('hidden');
+        }
+
+        function closePasswordModal() {
+            document.getElementById('changePasswordModal').classList.add('hidden');
+        }
+
+        function toggleTelemetry() {
+            const el = document.getElementById('telemetryData');
+            const arrow = document.getElementById('telemetryArrow');
+            if (el.classList.contains('hidden')) {
+                el.classList.remove('hidden');
+                arrow.innerHTML = '&uarr;';
+            } else {
+                el.classList.add('hidden');
+                arrow.innerHTML = '&darr;';
+            }
+        }
+
+        async function handleEditProfile(e) {
+            e.preventDefault();
+            const btn = document.getElementById('saveProfileBtn');
+            const name = document.getElementById('editName').value.trim();
+            const phone = document.getElementById('editPhone').value.trim();
+            const address = document.getElementById('editAddress').value.trim();
+
+            btn.disabled = true;
+            btn.textContent = 'Saving...';
+
+            try {
+                const response = await fetch('/api/auth/profile', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ full_name: name, phone, address })
+                });
+
+                const data = await response.json();
+                if (!response.ok || !data.success) {
+                    throw new Error(data.message || 'Failed to update profile information.');
+                }
+
+                closeEditModal();
+                showNotification('success', 'Profile updated successfully!');
+                await fetchFreshProfile();
+            } catch (err) {
+                showNotification('error', err.message || 'Failed to update profile.');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Save Changes';
+            }
+        }
+
+        async function handleChangePassword(e) {
+            e.preventDefault();
+            const btn = document.getElementById('savePasswordBtn');
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+
+            if (newPassword !== confirmNewPassword) {
+                alert('New passwords do not match!');
+                return;
+            }
+
+            if (newPassword.length < 6) {
+                alert('New password must be at least 6 characters!');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Updating...';
+
+            try {
+                const response = await fetch('/api/auth/password', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ currentPassword, newPassword })
+                });
+
+                const data = await response.json();
+                if (!response.ok || !data.success) {
+                    throw new Error(data.message || 'Failed to change password.');
+                }
+
+                closePasswordModal();
+                showNotification('success', 'Password updated successfully!');
+            } catch (err) {
+                showNotification('error', err.message || 'Failed to update password.');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Update Password';
+            }
+        }
+
+        async function deleteAccount() {
+            const confirm1 = confirm('Are you sure you want to delete your account? All order history and prescription data will be permanently wiped.');
+            if (!confirm1) return;
+
+            const confirm2 = confirm('WARNING: This action is irreversible. Press OK to permanently wipe your MY EYES account.');
+            if (!confirm2) return;
+
+            try {
+                const response = await fetch('/api/auth/account', {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+                if (!response.ok || !data.success) {
+                    throw new Error(data.message || 'Failed to delete account.');
+                }
+
+                alert('Your account has been deleted successfully.');
+                logout();
+            } catch (err) {
+                showNotification('error', err.message || 'Failed to wipe account.');
+            }
+        }
+
+        // Initialize profile load
+        document.addEventListener('DOMContentLoaded', fetchFreshProfile);
+    </script>
+</body>
+</html>

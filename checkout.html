@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Checkout | MY EYES</title>
+    
+    <!-- Efficient Theme Manager -->
+    <script>
+      (function() {
+        try {
+          var stored = localStorage.getItem('theme_preference');
+          var theme = (stored === 'dark' || stored === 'light')
+            ? stored
+            : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+          document.documentElement.classList.add(theme);
+        } catch(e) {
+          document.documentElement.classList.add('light');
+        }
+      })();
+    </script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              spectra: {
+                navy: '#0F0F0F', orange: '#FF5722', amber: '#FFC107',
+                light: '#FFFFFF', offwhite: '#F9FAFB', card: '#F3F4F6',
+                border: '#E5E7EB', 'dark-bg': '#1F1F23', 'dark-surface': '#27272B',
+                'dark-card': '#303036', 'dark-border': '#3F3F46', 'dark-text': '#E4E4E7',
+              }
+            },
+            fontFamily: { sans: ['Inter', 'sans-serif'], serif: ['Playfair Display', 'serif'] }
+          }
+        }
+      }
+    </script>
+    <style>
+      .spinner {
+          border: 4px solid rgba(255, 87, 34, 0.15);
+          width: 48px;
+          height: 48px;
+          border-radius: 50%;
+          border-left-color: #FF5722;
+          animation: spin 0.8s linear infinite;
+      }
+      @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+      }
+      .accordion-content {
+          max-height: 0;
+          overflow: hidden;
+          transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      .accordion-content.open {
+          max-height: 1000px;
+      }
+      .transition-all-300 {
+          transition: all 0.3s ease;
+      }
+      * {
+          font-family: Arial, Helvetica, sans-serif !important;
+      }
+    </style>
+</head>
+<body class="bg-spectra-offwhite dark:bg-spectra-dark-bg text-spectra-navy dark:text-spectra-dark-text min-h-screen font-sans antialiased transition-colors duration-300">
+
+    <!-- Header -->
+    <header class="border-b border-spectra-border dark:border-spectra-dark-border bg-white/80 dark:bg-spectra-dark-surface/80 backdrop-blur-md sticky top-0 z-40 h-16 flex items-center">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <a href="products.html" class="flex items-center gap-2 group">
+                <div class="w-8 h-8 bg-gradient-to-br from-spectra-amber to-spectra-orange rounded-lg transition-transform group-hover:scale-105"></div>
+                <span class="font-serif text-xl font-bold italic transition-colors group-hover:text-spectra-orange">MY EYES</span>
+            </a>
+            
+            <div class="flex items-center gap-4">
+                <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-spectra-dark-card transition-colors">
+                    <svg class="w-5 h-5 dark:hidden text-spectra-navy" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                    <svg class="w-5 h-5 hidden dark:block text-spectra-dark-text" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 9h-1m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                </button>
+                <a href="products.html" class="text-sm font-semibold hover:text-spectra-orange transition-colors flex items-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    Cancel Checkout
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-10 max-w-6xl">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            <!-- LEFT 7 COLS: ACCORDION PANEL FORM -->
+            <div class="lg:col-span-7 space-y-4">
+                
+                <!-- Error Banner Box -->
+                <div id="error-banner" class="hidden bg-red-50 dark:bg-red-950/20 text-red-700 dark:text-red-400 p-5 rounded-2xl border border-red-200 dark:border-red-900/50 text-center space-y-4">
+                    <div class="w-12 h-12 bg-red-100 dark:bg-red-900/40 rounded-full flex items-center justify-center mx-auto text-red-500">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-sm">Cart is Missing or Empty</h4>
+                        <p class="text-xs text-gray-400 mt-1">Please add items from the catalog before checking out.</p>
+                    </div>
+                    <a href="products.html" class="inline-block px-6 py-2.5 bg-spectra-orange text-white text-xs font-bold uppercase tracking-wider rounded-xl hover:bg-spectra-orange/90 transition-all">Browse Products</a>
+                </div>
+
+                <!-- Accordion Card 1: Shipping Address -->
+                <div class="bg-white dark:bg-spectra-dark-surface rounded-2xl border border-spectra-border dark:border-spectra-dark-border shadow-sm overflow-hidden">
+                    <button onclick="toggleAccordion(1)" class="w-full px-6 py-5 flex items-center justify-between text-left font-bold focus:outline-none">
+                        <div class="flex items-center gap-3">
+                            <span class="w-7 h-7 rounded-full bg-spectra-navy dark:bg-spectra-dark-card text-white flex items-center justify-center text-xs">1</span>
+                            <h2 class="text-lg font-serif italic">Shipping Address</h2>
+                        </div>
+                        <span id="accordion-arrow-1" class="transform transition-transform rotate-180">
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </span>
+                    </button>
+                    
+                    <div id="accordion-content-1" class="accordion-content open">
+                        <div class="px-6 pb-6 pt-2 border-t border-gray-100 dark:border-spectra-dark-border">
+                            <form id="shipping-form" class="space-y-4" onsubmit="event.preventDefault();">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">Full Name</label>
+                                        <input type="text" id="ship-name" required placeholder="John Doe" class="p-3 bg-gray-50 dark:bg-spectra-dark-card border border-spectra-border dark:border-spectra-dark-border rounded-xl outline-none focus:ring-2 focus:ring-spectra-orange w-full text-sm">
+                                        <span class="error-label text-red-500 text-xs font-semibold hidden mt-1"></span>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">Phone Number</label>
+                                        <input type="text" id="ship-phone" required placeholder="03001234567" class="p-3 bg-gray-50 dark:bg-spectra-dark-card border border-spectra-border dark:border-spectra-dark-border rounded-xl outline-none focus:ring-2 focus:ring-spectra-orange w-full text-sm">
+                                        <span class="error-label text-red-500 text-xs font-semibold hidden mt-1"></span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">Email Address</label>
+                                    <input type="email" id="ship-email" required placeholder="you@example.com" class="p-3 bg-gray-50 dark:bg-spectra-dark-card border border-spectra-border dark:border-spectra-dark-border rounded-xl outline-none focus:ring-2 focus:ring-spectra-orange w-full text-sm">
+                                    <span class="error-label text-red-500 text-xs font-semibold hidden mt-1"></span>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">Street Address</label>
+                                    <input type="text" id="ship-address" required placeholder="Apartment, Suite, Unit, Street address" class="p-3 bg-gray-50 dark:bg-spectra-dark-card border border-spectra-border dark:border-spectra-dark-border rounded-xl outline-none focus:ring-2 focus:ring-spectra-orange w-full text-sm">
+                                    <span class="error-label text-red-500 text-xs font-semibold hidden mt-1"></span>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">City</label>
+                                        <input type="text" id="ship-city" required placeholder="Karachi" class="p-3 bg-gray-50 dark:bg-spectra-dark-card border border-spectra-border dark:border-spectra-dark-border rounded-xl outline-none focus:ring-2 focus:ring-spectra-orange w-full text-sm">
+                                        <span class="error-label text-red-500 text-xs font-semibold hidden mt-1"></span>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">Zip Code</label>
+                                        <input type="text" id="ship-zip" required placeholder="75500" class="p-3 bg-gray-50 dark:bg-spectra-dark-card border border-spectra-border dark:border-spectra-dark-border rounded-xl outline-none focus:ring-2 focus:ring-spectra-orange w-full text-sm">
+                                        <span class="error-label text-red-500 text-xs font-semibold hidden mt-1"></span>
+                                    </div>
+                                </div>
+                                <div class="flex justify-end pt-3">
+                                    <button type="button" onclick="goToPaymentStep()" class="px-6 py-3 bg-spectra-navy hover:bg-spectra-orange text-white rounded-xl font-bold transition-all text-sm shadow-md active:scale-98">
+                                        Continue to Payment
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Accordion Card 2: Payment Details -->
+                <div class="bg-white dark:bg-spectra-dark-surface rounded-2xl border border-spectra-border dark:border-spectra-dark-border shadow-sm overflow-hidden">
+                    <button onclick="toggleAccordion(2)" class="w-full px-6 py-5 flex items-center justify-between text-left font-bold focus:outline-none">
+                        <div class="flex items-center gap-3">
+                            <span class="w-7 h-7 rounded-full bg-spectra-navy dark:bg-spectra-dark-card text-white flex items-center justify-center text-xs">2</span>
+                            <h2 class="text-lg font-serif italic">Payment Details</h2>
+                        </div>
+                        <span id="accordion-arrow-2" class="transform transition-transform">
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </span>
+                    </button>
+                    
+                    <div id="accordion-content-2" class="accordion-content">
+                        <div class="px-6 pb-6 pt-2 border-t border-gray-100 dark:border-spectra-dark-border space-y-6">
+                            
+                            <!-- Payment Switcher Radios -->
+                            <div class="grid grid-cols-2 gap-4">
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="payment_method" value="card" checked onchange="switchPaymentMethod('card')" class="peer hidden">
+                                    <div class="p-4 border border-spectra-border dark:border-spectra-dark-border rounded-2xl hover:border-spectra-orange peer-checked:border-spectra-orange peer-checked:bg-spectra-orange/5 dark:peer-checked:bg-spectra-orange/10 flex flex-col items-center gap-2 transition-all">
+                                        <svg class="w-6 h-6 text-spectra-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+                                        <span class="text-xs font-bold">Credit/Debit Card</span>
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="payment_method" value="paypal" onchange="switchPaymentMethod('paypal')" class="peer hidden">
+                                    <div class="p-4 border border-spectra-border dark:border-spectra-dark-border rounded-2xl hover:border-spectra-orange peer-checked:border-spectra-orange peer-checked:bg-spectra-orange/5 dark:peer-checked:bg-spectra-orange/10 flex flex-col items-center gap-2 transition-all">
+                                        <svg class="w-6 h-6 text-spectra-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                                        <span class="text-xs font-bold">PayPal Wallet</span>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <!-- CARD FIELDS FORM -->
+                            <form id="payment-card-form" class="space-y-4" onsubmit="event.preventDefault();">
+                                <div>
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">Cardholder Name</label>
+                                    <input type="text" id="card-name" placeholder="John Doe" class="p-3 bg-gray-50 dark:bg-spectra-dark-card border border-spectra-border dark:border-spectra-dark-border rounded-xl outline-none focus:ring-2 focus:ring-spectra-orange w-full text-sm">
+                                    <span class="error-label text-red-500 text-xs font-semibold hidden mt-1"></span>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">Card Number</label>
+                                    <input type="text" id="card-number" placeholder="0000 0000 0000 0000" maxlength="19" class="p-3 bg-gray-50 dark:bg-spectra-dark-card border border-spectra-border dark:border-spectra-dark-border rounded-xl outline-none focus:ring-2 focus:ring-spectra-orange w-full text-sm font-mono">
+                                    <span class="error-label text-red-500 text-xs font-semibold hidden mt-1"></span>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">Expiration Date</label>
+                                        <input type="text" id="card-expiry" placeholder="MM/YY" maxlength="5" class="p-3 bg-gray-50 dark:bg-spectra-dark-card border border-spectra-border dark:border-spectra-dark-border rounded-xl outline-none focus:ring-2 focus:ring-spectra-orange w-full text-sm text-center font-mono">
+                                        <span class="error-label text-red-500 text-xs font-semibold hidden mt-1"></span>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">CVV</label>
+                                        <input type="password" id="card-cvv" placeholder="***" maxlength="3" class="p-3 bg-gray-50 dark:bg-spectra-dark-card border border-spectra-border dark:border-spectra-dark-border rounded-xl outline-none focus:ring-2 focus:ring-spectra-orange w-full text-sm text-center font-mono">
+                                        <span class="error-label text-red-500 text-xs font-semibold hidden mt-1"></span>
+                                    </div>
+                                </div>
+                            </form>
+
+                            <!-- PAYPAL SLEEK BLOCK -->
+                            <div id="paypal-block" class="hidden bg-gray-50 dark:bg-spectra-dark-card p-6 rounded-2xl border border-spectra-border dark:border-spectra-dark-border text-center space-y-4">
+                                <div class="inline-block py-1.5 px-4 bg-yellow-400 rounded-full font-bold text-sm text-blue-900 tracking-wider">
+                                    PayPal Express
+                                </div>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 max-w-sm mx-auto">
+                                    Click "Place Order" below to proceed with PayPal Express Checkout. A secure wallet authorization portal will launch.
+                                </p>
+                            </div>
+
+                            <!-- Checkout Confirm Actions -->
+                            <div class="flex justify-between items-center pt-4 border-t border-gray-100 dark:border-spectra-dark-border">
+                                <button type="button" onclick="toggleAccordion(1)" class="text-sm font-bold text-gray-400 hover:text-spectra-navy transition-colors">
+                                    Back to Shipping
+                                </button>
+                                <button type="button" onclick="goToReviewStep()" class="px-8 py-3.5 bg-spectra-navy hover:bg-spectra-orange text-white rounded-xl font-bold transition-all text-sm shadow-md active:scale-98">
+                                    Continue to Review
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Accordion Card 3: Order Review & Confirmation -->
+                <div class="bg-white dark:bg-spectra-dark-surface rounded-2xl border border-spectra-border dark:border-spectra-dark-border shadow-sm overflow-hidden">
+                    <button onclick="toggleAccordion(3)" class="w-full px-6 py-5 flex items-center justify-between text-left font-bold focus:outline-none">
+                        <div class="flex items-center gap-3">
+                            <span class="w-7 h-7 rounded-full bg-spectra-navy dark:bg-spectra-dark-card text-white flex items-center justify-center text-xs">3</span>
+                            <h2 class="text-lg font-serif italic">Order Confirmation</h2>
+                        </div>
+                        <span id="accordion-arrow-3" class="transform transition-transform">
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </span>
+                    </button>
+                    
+                    <div id="accordion-content-3" class="accordion-content">
+                        <div class="px-6 pb-6 pt-2 border-t border-gray-100 dark:border-spectra-dark-border space-y-6">
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+                                <!-- Shipping Summary -->
+                                <div class="bg-gray-50 dark:bg-spectra-dark-card/50 p-4 rounded-xl border border-spectra-border dark:border-spectra-dark-border space-y-2">
+                                    <h4 class="font-bold text-xs uppercase tracking-wider text-gray-400">Shipping Info</h4>
+                                    <p id="review-shipping-name" class="font-bold">-</p>
+                                    <p id="review-shipping-phone" class="text-gray-500">-</p>
+                                    <p id="review-shipping-address" class="text-gray-500 leading-relaxed">-</p>
+                                </div>
+
+                                <!-- Payment Summary -->
+                                <div class="bg-gray-50 dark:bg-spectra-dark-card/50 p-4 rounded-xl border border-spectra-border dark:border-spectra-dark-border space-y-2">
+                                    <h4 class="font-bold text-xs uppercase tracking-wider text-gray-400">Payment Info</h4>
+                                    <p id="review-payment-method" class="font-bold text-gray-800 dark:text-gray-200">-</p>
+                                    <p id="review-card-details" class="text-gray-500 font-mono">-</p>
+                                </div>
+                            </div>
+
+                            <!-- Form Error Feedback Label -->
+                            <div id="form-error-feedback" class="text-red-500 text-sm font-semibold hidden"></div>
+
+                            <!-- Checkout Confirm Actions -->
+                            <div class="flex justify-between items-center pt-4 border-t border-gray-100 dark:border-spectra-dark-border">
+                                <button type="button" onclick="toggleAccordion(2)" class="text-sm font-bold text-gray-400 hover:text-spectra-navy transition-colors">
+                                    Back to Payment
+                                </button>
+                                <button type="button" onclick="submitCheckoutOrder()" id="checkout-submit-btn" class="px-8 py-3.5 bg-spectra-orange hover:bg-spectra-orange/95 text-white rounded-xl font-bold transition-all text-sm shadow-md active:scale-98">
+                                    Place Order
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- RIGHT 5 COLS: PERSISTENT ORDER SUMMARY -->
+            <div class="lg:col-span-5 space-y-6 lg:sticky lg:top-24">
+                <section class="bg-white dark:bg-spectra-dark-surface p-6 rounded-2xl border border-spectra-border dark:border-spectra-dark-border shadow-sm space-y-6">
+                    <h3 class="text-xl font-serif font-bold italic pb-3 border-b border-gray-100 dark:border-spectra-dark-border">Order Summary</h3>
+                    
+                    <!-- Product list container -->
+                    <div id="summary-items" class="max-h-60 overflow-y-auto divide-y divide-gray-50 dark:divide-spectra-dark-border pr-2">
+                        <!-- Loaded dynamically from cart -->
+                    </div>
+
+                    <!-- Discount Form -->
+                    <div class="space-y-2 pt-2">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-gray-400">Promo Code</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="coupon-input" placeholder="e.g. MYEYES10" class="p-2.5 text-sm uppercase bg-gray-50 dark:bg-spectra-dark-card border border-spectra-border dark:border-spectra-dark-border rounded-xl focus:ring-2 focus:ring-spectra-orange outline-none w-full font-mono">
+                            <button type="button" onclick="validateCoupon()" id="coupon-apply-btn" class="px-4 py-2.5 bg-spectra-navy hover:bg-spectra-orange text-white text-xs font-bold rounded-xl transition-all">Apply</button>
+                        </div>
+                        <div id="coupon-status" class="text-xs font-medium"></div>
+                    </div>
+
+                    <!-- Cost breakdowns -->
+                    <div class="space-y-3 text-sm pt-4 border-t border-gray-100 dark:border-spectra-dark-border">
+                        <div class="flex justify-between text-gray-500">
+                            <span>Subtotal</span>
+                            <span id="summary-subtotal">$0.00</span>
+                        </div>
+                        <div id="summary-discount-row" class="hidden flex justify-between text-green-500 font-semibold">
+                            <span>Discount (<span id="coupon-label">MYEYES10</span>)</span>
+                            <span id="summary-discount">-$0.00</span>
+                        </div>
+                        <div class="flex justify-between text-gray-500">
+                            <span>Shipping Cost</span>
+                            <span id="summary-shipping">$0.00</span>
+                        </div>
+                        <div class="flex justify-between text-gray-500">
+                            <span>Estimated Tax (8%)</span>
+                            <span id="summary-tax">$0.00</span>
+                        </div>
+                        <div class="flex justify-between text-lg font-bold pt-3 border-t border-gray-100 dark:border-spectra-dark-border">
+                            <span>Total</span>
+                            <span id="summary-total" class="text-spectra-orange">$0.00</span>
+                        </div>
+                    </div>
+
+                    <!-- Stripe details security -->
+                    <div class="bg-gray-50 dark:bg-spectra-dark-card/50 p-4 rounded-xl border border-spectra-border dark:border-spectra-dark-border flex items-center gap-3">
+                        <svg class="w-6 h-6 text-spectra-orange flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                        <div>
+                            <h5 class="text-xs font-bold">Encrypted Authorization</h5>
+                            <p class="text-[10px] text-gray-400 uppercase tracking-widest mt-0.5">Mock Banking Simulation Gateway</p>
+                        </div>
+                    </div>
+
+                </section>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- FULL-SCREEN AUTHORIZING OVERLAY -->
+    <div id="authorizing-overlay" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex flex-col items-center justify-center p-4">
+        <div class="bg-white dark:bg-spectra-dark-surface p-12 rounded-3xl max-w-sm w-full text-center shadow-2xl space-y-6">
+            <div class="flex justify-center">
+                <div class="spinner"></div>
+            </div>
+            <div class="space-y-2">
+                <h3 class="text-xl font-serif italic font-bold">Authorizing Transaction</h3>
+                <p class="text-gray-400 text-sm">Authorizing payment protocol securely...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script connection -->
+    <script src="checkout.js"></script>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order History | My Eyes Eyewear</title>
+    
+    <script src="theme.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              spectra: {
+                navy: '#0F0F0F', orange: '#FF5722', amber: '#FFC107',
+                light: '#FFFFFF', offwhite: '#F9FAFB', card: '#F3F4F6',
+                border: '#E5E7EB', 'dark-bg': '#1F1F23', 'dark-surface': '#27272B',
+                'dark-card': '#303036', 'dark-border': '#3F3F46', 'dark-text': '#E4E4E7',
+              }
+            },
+            fontFamily: { sans: ['Inter', 'sans-serif'], serif: ['Playfair Display', 'serif'] }
+          }
+        }
+      }
+    </script>
+</head>
+<body class="bg-spectra-offwhite dark:bg-spectra-dark-bg text-spectra-navy dark:text-spectra-dark-text min-h-screen">
+
+    <!-- Header -->
+    <header class="border-b border-spectra-border dark:border-spectra-dark-border bg-white dark:bg-spectra-dark-surface h-16 flex items-center">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <a href="products.html" class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-gradient-to-br from-spectra-amber to-spectra-orange rounded-lg"></div>
+                <span class="font-serif text-xl font-bold italic">My Eyes</span>
+            </a>
+            <div class="flex items-center gap-6">
+                <a href="products.html" class="text-sm font-medium hover:text-spectra-orange transition-colors">Shop</a>
+                <a href="profile.html" class="text-sm font-medium hover:text-spectra-orange transition-colors">Profile</a>
+                <button onclick="window.toggleTheme()" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-spectra-dark-card transition-colors">
+                    <svg class="w-5 h-5 dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h1m-16 0h1m2.738-6.122l.707.707m12.728 12.728l.707.707M6.343 17.657l-.707.707M17.657 6.343l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-12">
+        <div class="max-w-4xl mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10">
+                <div>
+                    <h1 class="text-4xl font-serif italic font-bold mb-2">Order History</h1>
+                    <p class="text-gray-500">Track and manage your recent eyewear purchases.</p>
+                </div>
+                <a href="products.html" class="px-6 py-2 bg-spectra-navy text-white rounded-lg font-bold hover:bg-spectra-orange transition-all text-sm">New Shopping</a>
+            </div>
+
+            <div id="orders-list" class="space-y-6">
+                <!-- Orders will be injected here -->
+                <div class="animate-pulse space-y-6">
+                    <div class="h-40 bg-gray-200 dark:bg-spectra-dark-card rounded-2xl"></div>
+                    <div class="h-40 bg-gray-200 dark:bg-spectra-dark-card rounded-2xl"></div>
+                </div>
+            </div>
+
+            <div id="no-orders" class="hidden text-center py-20 bg-white dark:bg-spectra-dark-surface rounded-3xl border border-dashed border-spectra-border dark:border-spectra-dark-border">
+                <div class="w-16 h-16 bg-gray-100 dark:bg-spectra-dark-card rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                </div>
+                <h3 class="text-lg font-bold mb-1">No orders found</h3>
+                <p class="text-sm text-gray-500 mb-6">You haven't placed any orders yet.</p>
+                <a href="products.html" class="text-spectra-orange font-bold hover:underline py-2 px-4 border border-spectra-orange rounded-lg transition-all">Browse Collection</a>
+            </div>
+        </div>
+    </main>
+
+    <script src="orders-history.js"></script>
+</body>
+</html>

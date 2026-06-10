@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products | My Eyes Eyewear</title>
+    
+    <!-- Efficient Theme Manager (Must be first to prevent FOUC) -->
+    <script src="theme.js"></script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              spectra: {
+                navy: '#0F0F0F',
+                orange: '#FF5722',
+                amber: '#FFC107',
+                light: '#FFFFFF',
+                offwhite: '#F9FAFB',
+                card: '#F3F4F6',
+                border: '#E5E7EB',
+                'dark-bg': '#1F1F23',
+                'dark-surface': '#27272B',
+                'dark-card': '#303036',
+                'dark-border': '#3F3F46',
+                'dark-text': '#E4E4E7',
+              }
+            },
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+              serif: ['Playfair Display', 'serif'],
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      /* Smooth transitions for theme switching */
+      * {
+        transition: background-color 0.3s ease, border-color 0.3s ease, color 0.15s ease;
+      }
+      
+      .sticky-sidebar {
+        position: sticky;
+        top: 2rem;
+        height: calc(100vh - 4rem);
+        overflow-y: auto;
+      }
+      .product-card:hover .add-to-cart {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      .add-to-cart {
+        transition: all 0.3s ease;
+        opacity: 0;
+        transform: translateY(10px);
+      }
+    </style>
+</head>
+<body class="bg-spectra-offwhite dark:bg-spectra-dark-bg text-spectra-navy dark:text-spectra-dark-text min-h-screen">
+
+    <!-- Header / Navigation -->
+    <header class="border-b border-spectra-border dark:border-spectra-dark-border bg-white dark:bg-spectra-dark-surface sticky top-0 z-50">
+        <div class="container mx-auto px-4 h-16 flex items-center justify-between">
+            <a href="index.html" class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-gradient-to-br from-spectra-amber to-spectra-orange rounded-lg"></div>
+                <span class="font-serif text-xl font-bold italic">My Eyes</span>
+            </a>
+            <nav class="hidden md:flex gap-8 font-medium">
+                <a href="index.html" class="hover:text-spectra-orange transition-colors">Home</a>
+                <a href="products.html" class="text-spectra-orange">Shop</a>
+                <a href="#" class="hover:text-spectra-orange transition-colors">Subscription</a>
+                <a href="profile.html" class="hover:text-spectra-orange transition-colors">Profile</a>
+            </nav>
+            <div class="flex items-center gap-4">
+                <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                    <svg class="w-5 h-5 dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                    <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 9h-1m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                </button>
+                <a href="checkout.html" class="relative p-2">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                    <span class="absolute top-0 right-0 bg-spectra-orange text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">0</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+        <div class="flex flex-col lg:flex-row gap-8">
+            
+            <!-- Sidebar Filters -->
+            <aside class="w-full lg:w-64 flex-shrink-0">
+                <div class="sticky-sidebar bg-white dark:bg-spectra-dark-surface p-6 rounded-2xl border border-spectra-border dark:border-spectra-dark-border shadow-sm">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-lg font-bold">Filters</h2>
+                        <button id="clear-filters" class="text-xs text-spectra-orange font-medium hover:underline">Clear All</button>
+                    </div>
+
+                    <form id="filter-form" class="space-y-8">
+                        
+                        <!-- Search -->
+                        <div class="relative">
+                            <input type="text" name="search" placeholder="Search products..." class="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-spectra-dark-card border border-spectra-border dark:border-spectra-dark-border rounded-xl focus:ring-2 focus:ring-spectra-orange outline-none text-sm">
+                            <svg class="w-4 h-4 absolute left-3 top-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        </div>
+
+                        <!-- Category -->
+                        <div>
+                            <label class="block text-sm font-semibold mb-3">Category</label>
+                            <select name="category" class="w-full p-2.5 bg-gray-50 dark:bg-spectra-dark-card border border-spectra-border dark:border-spectra-dark-border rounded-xl focus:ring-2 focus:ring-spectra-orange outline-none text-sm">
+                                <option value="">All Categories</option>
+                                <option value="Eyeglasses">Eyeglasses</option>
+                                <option value="Sunglasses">Sunglasses</option>
+                                <option value="Contact Lenses">Contact Lenses</option>
+                            </select>
+                        </div>
+
+                        <!-- Brand -->
+                        <div>
+                            <label class="block text-sm font-semibold mb-3">Brand</label>
+                            <div class="space-y-2 max-h-40 overflow-y-auto pr-2 custom-scrollbar">
+                                <label class="flex items-center gap-3 text-sm cursor-pointer group">
+                                    <input type="checkbox" name="brand" value="Ray-Ban" class="w-4 h-4 rounded border-gray-300 text-spectra-orange focus:ring-spectra-orange">
+                                    <span class="group-hover:text-spectra-orange transition-colors">Ray-Ban</span>
+                                </label>
+                                <label class="flex items-center gap-3 text-sm cursor-pointer group">
+                                    <input type="checkbox" name="brand" value="Gucci" class="w-4 h-4 rounded border-gray-300 text-spectra-orange focus:ring-spectra-orange">
+                                    <span class="group-hover:text-spectra-orange transition-colors">Gucci</span>
+                                </label>
+                                <label class="flex items-center gap-3 text-sm cursor-pointer group">
+                                    <input type="checkbox" name="brand" value="Oakley" class="w-4 h-4 rounded border-gray-300 text-spectra-orange focus:ring-spectra-orange">
+                                    <span class="group-hover:text-spectra-orange transition-colors">Oakley</span>
+                                </label>
+                                <label class="flex items-center gap-3 text-sm cursor-pointer group">
+                                    <input type="checkbox" name="brand" value="Police" class="w-4 h-4 rounded border-gray-300 text-spectra-orange focus:ring-spectra-orange">
+                                    <span class="group-hover:text-spectra-orange transition-colors">Police</span>
+                                </label>
+                                <label class="flex items-center gap-3 text-sm cursor-pointer group">
+                                    <input type="checkbox" name="brand" value="Prada" class="w-4 h-4 rounded border-gray-300 text-spectra-orange focus:ring-spectra-orange">
+                                    <span class="group-hover:text-spectra-orange transition-colors">Prada</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Gender -->
+                        <div>
+                            <label class="block text-sm font-semibold mb-3">Gender</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="gender" value="" class="peer hidden" checked>
+                                    <div class="text-center py-2 text-xs border border-spectra-border dark:border-spectra-dark-border rounded-lg peer-checked:bg-spectra-orange peer-checked:text-white peer-checked:border-spectra-orange transition-all">All</div>
+                                </label>
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="gender" value="male" class="peer hidden">
+                                    <div class="text-center py-2 text-xs border border-spectra-border dark:border-spectra-dark-border rounded-lg peer-checked:bg-spectra-orange peer-checked:text-white peer-checked:border-spectra-orange transition-all">Men</div>
+                                </label>
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="gender" value="female" class="peer hidden">
+                                    <div class="text-center py-2 text-xs border border-spectra-border dark:border-spectra-dark-border rounded-lg peer-checked:bg-spectra-orange peer-checked:text-white peer-checked:border-spectra-orange transition-all">Women</div>
+                                </label>
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="gender" value="unisex" class="peer hidden">
+                                    <div class="text-center py-2 text-xs border border-spectra-border dark:border-spectra-dark-border rounded-lg peer-checked:bg-spectra-orange peer-checked:text-white peer-checked:border-spectra-orange transition-all">Unisex</div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Frame Type -->
+                        <div>
+                            <label class="block text-sm font-semibold mb-3">Frame Type</label>
+                            <div class="space-y-2">
+                                <label class="flex items-center gap-3 text-sm cursor-pointer">
+                                    <input type="checkbox" name="frame_type" value="full_rim" class="w-4 h-4 rounded border-gray-300 text-spectra-orange focus:ring-spectra-orange">
+                                    <span>Full Rim</span>
+                                </label>
+                                <label class="flex items-center gap-3 text-sm cursor-pointer">
+                                    <input type="checkbox" name="frame_type" value="half_rim" class="w-4 h-4 rounded border-gray-300 text-spectra-orange focus:ring-spectra-orange">
+                                    <span>Half Rim</span>
+                                </label>
+                                <label class="flex items-center gap-3 text-sm cursor-pointer">
+                                    <input type="checkbox" name="frame_type" value="rimless" class="w-4 h-4 rounded border-gray-300 text-spectra-orange focus:ring-spectra-orange">
+                                    <span>Rimless</span>
+                                </label>
+                                <label class="flex items-center gap-3 text-sm cursor-pointer">
+                                    <input type="checkbox" name="frame_type" value="aviator" class="w-4 h-4 rounded border-gray-300 text-spectra-orange focus:ring-spectra-orange">
+                                    <span>Aviator</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Price Range -->
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <label class="text-sm font-semibold">Price Range</label>
+                                <span class="text-xs font-medium text-spectra-orange" id="price-display">Max: 50,000 PKR</span>
+                            </div>
+                            <input type="range" id="price-slider" name="max_price" min="0" max="50000" step="500" value="50000" class="w-full h-1.5 bg-gray-200 dark:bg-spectra-dark-card rounded-lg appearance-none cursor-pointer accent-spectra-orange">
+                            <div class="flex justify-between mt-2 text-[10px] text-gray-400 font-medium">
+                                <span>0</span>
+                                <span>25k</span>
+                                <span>50k+</span>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+            </aside>
+
+            <!-- Product Grid -->
+            <section class="flex-1">
+                <div class="flex items-center justify-between mb-8">
+                    <div>
+                        <h1 class="text-3xl font-serif font-bold italic mb-1">Our Collection</h1>
+                        <p class="text-sm text-gray-500 dark:text-gray-400" id="product-count">Showing all products</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="text-xs font-medium text-gray-400 uppercase tracking-wider">Sort by:</span>
+                        <select id="sort-select" class="bg-transparent border-none text-sm font-semibold outline-none cursor-pointer text-spectra-navy dark:text-spectra-dark-text">
+                            <option value="newest">Newest First</option>
+                            <option value="price-low">Price: Low to High</option>
+                            <option value="price-high">Price: High to Low</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Skeleton Loader / Cards Container -->
+                <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                    <!-- Cards will be injected by products.js -->
+                    <div class="animate-pulse bg-gray-200 dark:bg-spectra-dark-card aspect-[4/5] rounded-2xl"></div>
+                    <div class="animate-pulse bg-gray-200 dark:bg-spectra-dark-card aspect-[4/5] rounded-2xl"></div>
+                    <div class="animate-pulse bg-gray-200 dark:bg-spectra-dark-card aspect-[4/5] rounded-2xl"></div>
+                    <div class="animate-pulse bg-gray-200 dark:bg-spectra-dark-card aspect-[4/5] rounded-2xl"></div>
+                    <div class="animate-pulse bg-gray-200 dark:bg-spectra-dark-card aspect-[4/5] rounded-2xl"></div>
+                    <div class="animate-pulse bg-gray-200 dark:bg-spectra-dark-card aspect-[4/5] rounded-2xl"></div>
+                </div>
+
+                <!-- Empty State -->
+                <div id="empty-state" class="hidden flex-col items-center justify-center py-20 text-center">
+                    <div class="w-20 h-20 bg-gray-100 dark:bg-spectra-dark-card rounded-full flex items-center justify-center mb-4 text-gray-400">
+                        <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 9.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">No results found</h3>
+                    <p class="text-gray-500 max-w-sm">Try adjusting your filters or search terms to find what you're looking for.</p>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-spectra-navy text-white py-12 mt-20">
+        <div class="container mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div class="col-span-1 md:col-span-2">
+                <div class="flex items-center gap-2 mb-6">
+                    <div class="w-8 h-8 bg-gradient-to-br from-spectra-amber to-spectra-orange rounded-lg"></div>
+                    <span class="font-serif text-2xl font-bold italic">My Eyes</span>
+                </div>
+                <p class="text-gray-400 max-w-md mb-6 leading-relaxed">
+                    Pakistan's first eyewear subscription service. Bringing quality optics and premium styles directly to your doorstep with unmatched convenience.
+                </p>
+                <div class="flex gap-4">
+                    <a href="#" class="w-10 h-10 rounded-full border border-gray-800 flex items-center justify-center hover:bg-white hover:text-spectra-navy transition-all">FB</a>
+                    <a href="#" class="w-10 h-10 rounded-full border border-gray-800 flex items-center justify-center hover:bg-white hover:text-spectra-navy transition-all">IG</a>
+                    <a href="#" class="w-10 h-10 rounded-full border border-gray-800 flex items-center justify-center hover:bg-white hover:text-spectra-navy transition-all">TW</a>
+                </div>
+            </div>
+            <div>
+                <h4 class="font-bold mb-6 pt-2">Quick Links</h4>
+                <ul class="space-y-4 text-gray-400 text-sm">
+                    <li><a href="index.html" class="hover:text-white transition-colors">Home</a></li>
+                    <li><a href="products.html" class="hover:text-white transition-colors">Shop All</a></li>
+                    <li><a href="#" class="hover:text-white transition-colors">Subscription Plans</a></li>
+                    <li><a href="profile.html" class="hover:text-white transition-colors">My Profile</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-bold mb-6 pt-2">Support</h4>
+                <ul class="space-y-4 text-gray-400 text-sm">
+                    <li><a href="#" class="hover:text-white transition-colors">Shipping Policy</a></li>
+                    <li><a href="#" class="hover:text-white transition-colors">Returns & Exchanges</a></li>
+                    <li><a href="#" class="hover:text-white transition-colors">Privacy Policy</a></li>
+                    <li><a href="#" class="hover:text-white transition-colors">Contact Us</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="container mx-auto px-4 mt-12 pt-8 border-t border-gray-800 text-center text-gray-500 text-xs">
+            &copy; 2026 My Eyes Eyewear. All Rights Reserved.
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="products.js"></script>
+    <script>
+        // Use the high-efficiency theme manager toggle
+        const themeBtn = document.getElementById('theme-toggle');
+        themeBtn.addEventListener('click', () => {
+            window.toggleTheme();
+        });
+    </script>
+</body>
+</html>
